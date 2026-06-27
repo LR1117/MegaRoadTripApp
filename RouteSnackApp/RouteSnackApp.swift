@@ -6,12 +6,25 @@
 //
 
 import SwiftUI
+import Combine
 
 @main
-struct MegaRoadTripAppApp: App {
+struct RouteSnackApp: App {
+    @StateObject private var tripVM = TripViewModel()
+    @State private var tripConfigured = false
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            if tripConfigured {
+                MapContainerView()
+                    .environmentObject(tripVM)
+            } else {
+                TripSetupView()
+                    .environmentObject(tripVM)
+                    .onReceive(tripVM.$route.compactMap { $0 }) { _ in
+                        tripConfigured = true
+                    }
+            }
         }
     }
 }
