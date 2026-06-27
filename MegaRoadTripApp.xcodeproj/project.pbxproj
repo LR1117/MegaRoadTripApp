@@ -24,10 +24,32 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		0CB958E72FEF29A3001CB883 /* MegaRoadTripAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = MegaRoadTripAppTests.xctest; path = /Users/liamriedy/Desktop/personalProjects/MegaRoadTripApp/MegaRoadTripApp/build/Debug/MegaRoadTripApp.app/Contents/PlugIns/MegaRoadTripAppTests.xctest; sourceTree = "<absolute>"; };
-		0CB958F12FEF29A3001CB883 /* MegaRoadTripAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = MegaRoadTripAppUITests.xctest; path = "/Users/liamriedy/Desktop/personalProjects/MegaRoadTripApp/MegaRoadTripApp/build/Debug/MegaRoadTripAppUITests-Runner.app/Contents/PlugIns/MegaRoadTripAppUITests.xctest"; sourceTree = "<absolute>"; };
 		0CB959362FEF5FA6001CB883 /* MegaRoadTripApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MegaRoadTripApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0CE9196F2FEF62830083689A /* MegaRoadTripAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MegaRoadTripAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		0CE919702FEF62830083689A /* MegaRoadTripAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MegaRoadTripAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		0CE9198F2FEF62B70083689A /* Exceptions for "Utilities" folder in "MegaRoadTripApp" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Constants.swift,
+				Extensions.swift,
+			);
+			target = 0CB958D92FEF29A1001CB883 /* MegaRoadTripApp */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		0CE919902FEF62B70083689A /* Exceptions for "Utilities" folder in "Copy Bundle Resources" phase from "MegaRoadTripApp" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = 0CB958D82FEF29A1001CB883 /* Resources */;
+			membershipExceptions = (
+				Constants.swift,
+				Extensions.swift,
+			);
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		0CB958DC2FEF29A1001CB883 /* RouteSnackApp */ = {
@@ -45,9 +67,23 @@
 			path = ViewModels;
 			sourceTree = "<group>";
 		};
-		0CB959352FEF5210001CB883 /* New Folder */ = {
+		0CB959352FEF5210001CB883 /* Views */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "New Folder";
+			path = Views;
+			sourceTree = "<group>";
+		};
+		0CB9593F2FEF6194001CB883 /* Services */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Services;
+			sourceTree = "<group>";
+		};
+		0CB959412FEF61AB001CB883 /* Utilities */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				0CE9198F2FEF62B70083689A /* Exceptions for "Utilities" folder in "MegaRoadTripApp" target */,
+				0CE919902FEF62B70083689A /* Exceptions for "Utilities" folder in "Copy Bundle Resources" phase from "MegaRoadTripApp" target */,
+			);
+			path = Utilities;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -83,7 +119,11 @@
 				0CB958DC2FEF29A1001CB883 /* RouteSnackApp */,
 				0CB9590D2FEF2F02001CB883 /* Models */,
 				0CB9591D2FEF2F51001CB883 /* ViewModels */,
-				0CB959352FEF5210001CB883 /* New Folder */,
+				0CB959352FEF5210001CB883 /* Views */,
+				0CB9593F2FEF6194001CB883 /* Services */,
+				0CB959412FEF61AB001CB883 /* Utilities */,
+				0CE9196F2FEF62830083689A /* MegaRoadTripAppTests.xctest */,
+				0CE919702FEF62830083689A /* MegaRoadTripAppUITests.xctest */,
 				0CB959362FEF5FA6001CB883 /* MegaRoadTripApp.app */,
 			);
 			sourceTree = "<group>";
@@ -107,7 +147,9 @@
 				0CB958DC2FEF29A1001CB883 /* RouteSnackApp */,
 				0CB9590D2FEF2F02001CB883 /* Models */,
 				0CB9591D2FEF2F51001CB883 /* ViewModels */,
-				0CB959352FEF5210001CB883 /* New Folder */,
+				0CB959352FEF5210001CB883 /* Views */,
+				0CB9593F2FEF6194001CB883 /* Services */,
+				0CB959412FEF61AB001CB883 /* Utilities */,
 			);
 			name = MegaRoadTripApp;
 			packageProductDependencies = (
@@ -133,7 +175,7 @@
 			packageProductDependencies = (
 			);
 			productName = MegaRoadTripAppTests;
-			productReference = 0CB958E72FEF29A3001CB883 /* MegaRoadTripAppTests.xctest */;
+			productReference = 0CE9196F2FEF62830083689A /* MegaRoadTripAppTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		0CB958F02FEF29A3001CB883 /* MegaRoadTripAppUITests */ = {
@@ -153,7 +195,7 @@
 			packageProductDependencies = (
 			);
 			productName = MegaRoadTripAppUITests;
-			productReference = 0CB958F12FEF29A3001CB883 /* MegaRoadTripAppUITests.xctest */;
+			productReference = 0CE919702FEF62830083689A /* MegaRoadTripAppUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
