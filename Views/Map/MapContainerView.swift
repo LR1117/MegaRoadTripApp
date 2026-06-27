@@ -13,14 +13,35 @@ struct MapContainerView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
+            // ── Map ────────────────────────────────────────────────────────
             Map(position: $tripVM.cameraPosition) {
-                // User location puck
                 UserAnnotation()
 
-                // Route polyline
                 if let route = tripVM.route {
                     MapPolyline(route.polyline)
                         .stroke(.blue, lineWidth: 5)
+                }
+
+                // Origin pin
+                if let origin = tripVM.trip.origin {
+                    Annotation(origin.name, coordinate: origin.coordinate) {
+                        Image(systemName: "smallcircle.filled.circle")
+                            .padding(8)
+                            .background(.green)
+                            .clipShape(Circle())
+                            .foregroundStyle(.white)
+                    }
+                }
+
+                // Destination pin
+                if let dest = tripVM.trip.destination {
+                    Annotation(dest.name, coordinate: dest.coordinate) {
+                        Image(systemName: "mappin.circle.fill")
+                            .padding(8)
+                            .background(.red)
+                            .clipShape(Circle())
+                            .foregroundStyle(.white)
+                    }
                 }
 
                 // Discovered place pins
@@ -37,10 +58,20 @@ struct MapContainerView: View {
                 MapUserLocationButton()
                 MapScaleView()
             }
+            .ignoresSafeArea(edges: .top)
 
-            // HUD overlay buttons
-            MapOverlayView()
-                .environmentObject(tripVM)
+            // ── Overlay HUD ────────────────────────────────────────────────
+            VStack(spacing: 0) {
+                // Top bar: route summary + Apple Maps link
+                RouteHeaderView()
+                    .environmentObject(tripVM)
+
+                Spacer()
+
+                // Bottom action strip
+                MapOverlayView()
+                    .environmentObject(tripVM)
+            }
         }
         .sheet(isPresented: $tripVM.showResults) {
             PlaceResultsSheet()
@@ -49,24 +80,17 @@ struct MapContainerView: View {
     }
 }
 
-// Small coloured pin
 struct PlacePinView: View {
     let place: PlaceResult
     var body: some View {
-        Image(systemName: iconName)
+        Image(systemName: place.category.icon)
             .padding(8)
-            .background(iconColor)
+            .background(pinColor)
             .clipShape(Circle())
             .foregroundStyle(.white)
+            .shadow(radius: 3)
     }
-    var iconName: String {
-        switch place.category {
-        case .food:     return "fork.knife"
-        case .gas:      return "fuelpump.fill"
-        case .restroom: return "toilet.fill"
-        }
-    }
-    var iconColor: Color {
+    var pinColor: Color {
         switch place.category {
         case .food:     return .orange
         case .gas:      return .green

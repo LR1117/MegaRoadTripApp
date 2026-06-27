@@ -10,7 +10,7 @@ import Foundation
 struct Passenger: Codable, Identifiable {
     var id: UUID = UUID()
     var name: String
-    var emoji: String          // used as avatar (🧑, 👦, 👧, etc.)
+    var emoji: String
     var dietaryProfile: DietaryProfile
     var isDriver: Bool = false
 }

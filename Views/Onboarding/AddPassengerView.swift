@@ -15,61 +15,109 @@ struct AddPassengerView: View {
     var body: some View {
         NavigationStack {
             Form {
+                // ── Identity ───────────────────────────────────────────────
                 Section("Name & Avatar") {
-                    TextField("Name", text: $vm.draft.name)
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack {
-                            ForEach(vm.emojiOptions, id: \.self) { e in
-                                Text(e)
-                                    .font(.largeTitle)
-                                    .padding(6)
-                                    .background(vm.draft.emoji == e ? Color.accentColor.opacity(0.2) : Color.clear)
-                                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                                    .onTapGesture { vm.draft.emoji = e }
+                    TextField("Passenger name", text: $vm.name)
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Choose an avatar")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(vm.emojiOptions, id: \.self) { e in
+                                    Text(e)
+                                        .font(.system(size: 32))
+                                        .padding(8)
+                                        .background(
+                                            vm.emoji == e
+                                            ? Color.accentColor.opacity(0.2)
+                                            : Color(.tertiarySystemBackground)
+                                        )
+                                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .stroke(vm.emoji == e ? Color.accentColor : Color.clear, lineWidth: 2)
+                                        )
+                                        .onTapGesture { vm.emoji = e }
+                                }
                             }
                         }
                     }
+                    .padding(.vertical, 4)
+
+                    Toggle("This person is driving", isOn: $vm.isDriver)
                 }
 
-                Section("Dietary Restrictions") {
+                // ── Dietary restrictions ───────────────────────────────────
+                Section {
                     ForEach(DietaryRestriction.allCases) { r in
-                        Toggle(r.displayName, isOn: Binding(
-                            get: { vm.draft.dietaryProfile.restrictions.contains(r) },
-                            set: { if $0 { vm.draft.dietaryProfile.restrictions.insert(r) }
-                                  else { vm.draft.dietaryProfile.restrictions.remove(r) } }
-                        ))
+                        Toggle(isOn: Binding(
+                            get: { vm.dietaryProfile.restrictions.contains(r) },
+                            set: {
+                                if $0 { vm.dietaryProfile.restrictions.insert(r) }
+                                else  { vm.dietaryProfile.restrictions.remove(r) }
+                            }
+                        )) {
+                            Label(r.displayName, title: { Text(r.displayName) })
+                                .badge(r.icon)
+                        }
                     }
+                } header: {
+                    Text("Dietary Restrictions")
+                } footer: {
+                    Text("These help RouteSnack prioritise restaurants that suit everyone.")
                 }
 
-                Section("Allergens") {
+                // ── Allergens ──────────────────────────────────────────────
+                Section {
                     ForEach(Allergen.allCases) { a in
-                        Toggle(a.displayName, isOn: Binding(
-                            get: { vm.draft.dietaryProfile.allergens.contains(a) },
-                            set: { if $0 { vm.draft.dietaryProfile.allergens.insert(a) }
-                                  else { vm.draft.dietaryProfile.allergens.remove(a) } }
-                        ))
+                        Toggle(isOn: Binding(
+                            get: { vm.dietaryProfile.allergens.contains(a) },
+                            set: {
+                                if $0 { vm.dietaryProfile.allergens.insert(a) }
+                                else  { vm.dietaryProfile.allergens.remove(a) }
+                            }
+                        )) {
+                            Label(a.displayName, title: { Text(a.displayName) })
+                                .badge(a.icon)
+                        }
                     }
+                } header: {
+                    Text("Allergens")
+                } footer: {
+                    Text("Allergens are flagged prominently and affect place scoring.")
                 }
 
-                Section("Cuisine Preferences") {
+                // ── Cuisine preferences ────────────────────────────────────
+                Section("Favourite Cuisines") {
                     ForEach(CuisinePreference.allCases) { c in
-                        Toggle(c.displayName, isOn: Binding(
-                            get: { vm.draft.dietaryProfile.cuisinePreferences.contains(c) },
-                            set: { if $0 { vm.draft.dietaryProfile.cuisinePreferences.insert(c) }
-                                  else { vm.draft.dietaryProfile.cuisinePreferences.remove(c) } }
-                        ))
+                        Toggle(isOn: Binding(
+                            get: { vm.dietaryProfile.cuisinePreferences.contains(c) },
+                            set: {
+                                if $0 { vm.dietaryProfile.cuisinePreferences.insert(c) }
+                                else  { vm.dietaryProfile.cuisinePreferences.remove(c) }
+                            }
+                        )) {
+                            Label(c.displayName, title: { Text(c.displayName) })
+                                .badge(c.icon)
+                        }
                     }
                 }
             }
             .navigationTitle("Add Passenger")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Add") {
-                        vm.saveTo(trip: &tripVM.trip)
+                        tripVM.addPassenger(vm.buildPassenger())
                         dismiss()
                     }
-                    .disabled(vm.draft.name.isEmpty)
+                    .disabled(!vm.isValid)
+                    .fontWeight(.semibold)
                 }
             }
         }

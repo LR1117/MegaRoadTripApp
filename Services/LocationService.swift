@@ -13,12 +13,13 @@ class LocationService: NSObject, ObservableObject, CLLocationManagerDelegate {
 
     @Published var currentLocation: CLLocation?
     @Published var authorizationStatus: CLAuthorizationStatus = .notDetermined
+    @Published var locationError: String?
 
     override init() {
         super.init()
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
-        manager.distanceFilter = 50   // update every 50 m
+        manager.distanceFilter = 50
     }
 
     func requestPermission() {
@@ -29,22 +30,29 @@ class LocationService: NSObject, ObservableObject, CLLocationManagerDelegate {
         manager.startUpdatingLocation()
     }
 
+    func stopTracking() {
+        manager.stopUpdatingLocation()
+    }
+
+    // MARK: - CLLocationManagerDelegate
+
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         currentLocation = locations.last
     }
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         authorizationStatus = manager.authorizationStatus
-        #if os(macOS)
-        // On macOS, use .authorized as the available case
-        if manager.authorizationStatus == .authorized {
+        switch manager.authorizationStatus {
+        case .authorizedWhenInUse, .authorizedAlways:
             startTracking()
+        case .denied, .restricted:
+            locationError = "Location access denied. Please enable it in Settings."
+        default:
+            break
         }
-        #else
-        // On iOS/iPadOS/watchOS/tvOS, consider both when-in-use and always
-        if manager.authorizationStatus == .authorizedWhenInUse || manager.authorizationStatus == .authorizedAlways {
-            startTracking()
-        }
-        #endif
+    }
+
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        locationError = error.localizedDescription
     }
 }

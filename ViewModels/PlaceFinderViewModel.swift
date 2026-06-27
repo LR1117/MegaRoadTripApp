@@ -8,15 +8,19 @@
 import SwiftUI
 import MapKit
 import Combine
+import UIKit
+ 
 
-// Thin VM used by the results sheet to open navigation
 class PlaceFinderViewModel: ObservableObject {
-    @MainActor
-    init() {}
-    
     func openInMaps(_ result: PlaceResult) {
         result.mapItem.openInMaps(launchOptions: [
             MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving
         ])
+    }
+
+    func callPlace(_ result: PlaceResult) {
+        guard let phone = result.phoneNumber,
+              let url = URL(string: "tel://\(phone.filter { $0.isNumber })") else { return }
+        UIApplication.shared.open(url)
     }
 }

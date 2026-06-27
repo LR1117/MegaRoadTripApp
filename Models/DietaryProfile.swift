@@ -24,13 +24,55 @@ enum DietaryRestriction: String, Codable, CaseIterable, Identifiable {
         case .keto:       return "Keto"
         }
     }
+
+    var icon: String {
+        switch self {
+        case .vegetarian: return "🥗"
+        case .vegan:      return "🌱"
+        case .halal:      return "☪️"
+        case .kosher:     return "✡️"
+        case .glutenFree: return "🚫🌾"
+        case .dairyFree:  return "🚫🥛"
+        case .lowCarb:    return "📉"
+        case .keto:       return "🥓"
+        }
+    }
 }
 
 enum CuisinePreference: String, Codable, CaseIterable, Identifiable {
     case american, mexican, italian, asian, mediterranean, fastFood, pizza, burgers, salads, bbq
 
     var id: String { rawValue }
-    var displayName: String { rawValue.capitalized }
+
+    var displayName: String {
+        switch self {
+        case .american:      return "American"
+        case .mexican:       return "Mexican"
+        case .italian:       return "Italian"
+        case .asian:         return "Asian"
+        case .mediterranean: return "Mediterranean"
+        case .fastFood:      return "Fast Food"
+        case .pizza:         return "Pizza"
+        case .burgers:       return "Burgers"
+        case .salads:        return "Salads"
+        case .bbq:           return "BBQ"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .american:      return "🦅"
+        case .mexican:       return "🌮"
+        case .italian:       return "🍝"
+        case .asian:         return "🍜"
+        case .mediterranean: return "🫙"
+        case .fastFood:      return "🍟"
+        case .pizza:         return "🍕"
+        case .burgers:       return "🍔"
+        case .salads:        return "🥗"
+        case .bbq:           return "🔥"
+        }
+    }
 }
 
 struct DietaryProfile: Codable, Identifiable {

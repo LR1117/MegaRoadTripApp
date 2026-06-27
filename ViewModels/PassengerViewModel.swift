@@ -9,13 +9,28 @@ import SwiftUI
 import Combine
 
 class PassengerViewModel: ObservableObject {
-    @Published var draft: Passenger = Passenger(name: "", emoji: "🧑", dietaryProfile: DietaryProfile())
+    @Published var name: String = ""
+    @Published var emoji: String = "🧑"
+    @Published var isDriver: Bool = false
+    @Published var dietaryProfile: DietaryProfile = DietaryProfile()
 
-    let emojiOptions = ["🧑","👦","👧","👨","👩","🧒","🧓","👴","👵"]
+    let emojiOptions = ["🧑","👦","👧","👨","👩","🧒","🧓","👴","👵","🧔","👱"]
 
-    func saveTo(trip: inout Trip) {
-        guard !draft.name.isEmpty else { return }
-        trip.passengers.append(draft)
-        draft = Passenger(name: "", emoji: "🧑", dietaryProfile: DietaryProfile())
+    var isValid: Bool { !name.trimmingCharacters(in: .whitespaces).isEmpty }
+
+    func buildPassenger() -> Passenger {
+        Passenger(
+            name: name.trimmingCharacters(in: .whitespaces),
+            emoji: emoji,
+            dietaryProfile: dietaryProfile,
+            isDriver: isDriver
+        )
+    }
+
+    func reset() {
+        name = ""
+        emoji = "🧑"
+        isDriver = false
+        dietaryProfile = DietaryProfile()
     }
 }

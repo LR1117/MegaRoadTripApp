@@ -34,7 +34,13 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Constants.swift,
-				Extensions.swift,
+			);
+			target = 0CB958D92FEF29A1001CB883 /* MegaRoadTripApp */;
+		};
+		0CE919CA2FEFE6C10083689A /* Exceptions for "Services" folder in "MegaRoadTripApp" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Untitled.swift,
 			);
 			target = 0CB958D92FEF29A1001CB883 /* MegaRoadTripApp */;
 		};
@@ -46,7 +52,6 @@
 			buildPhase = 0CB958D82FEF29A1001CB883 /* Resources */;
 			membershipExceptions = (
 				Constants.swift,
-				Extensions.swift,
 			);
 		};
 /* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
@@ -74,6 +79,9 @@
 		};
 		0CB9593F2FEF6194001CB883 /* Services */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				0CE919CA2FEFE6C10083689A /* Exceptions for "Services" folder in "MegaRoadTripApp" target */,
+			);
 			path = Services;
 			sourceTree = "<group>";
 		};

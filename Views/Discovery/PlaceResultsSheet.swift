@@ -16,7 +16,7 @@ struct PlaceResultsSheet: View {
         case .food:     return "Food Near You"
         case .gas:      return "Gas Stations"
         case .restroom: return "Rest Stops"
-        case nil:       return "Results"
+        case nil:       return "Nearby"
         }
     }
 
@@ -24,39 +24,96 @@ struct PlaceResultsSheet: View {
         NavigationStack {
             Group {
                 if tripVM.isSearching {
-                    ProgressView("Searching…")
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    VStack(spacing: 16) {
+                        ProgressView()
+                        Text("Finding the best options…")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+
                 } else if tripVM.discoveredPlaces.isEmpty {
-                    ContentUnavailableView("Nothing Nearby",
-                                          systemImage: "mappin.slash",
-                                          description: Text("Try expanding your search radius."))
+                    ContentUnavailableView(
+                        "Nothing Found",
+                        systemImage: "mappin.slash",
+                        description: Text("Try searching in a different area.")
+                    )
+
                 } else {
                     ScrollView {
                         LazyVStack(spacing: 12) {
+                            if tripVM.activeCategory == .food {
+                                GroupSummaryBanner(passengers: tripVM.trip.passengers)
+                                    .padding(.horizontal)
+                            }
+
                             ForEach(tripVM.discoveredPlaces) { place in
                                 PlaceCardView(place: place) {
                                     finderVM.openInMaps(place)
                                 }
+                                .padding(.horizontal)
                             }
                         }
-                        .padding()
+                        .padding(.vertical)
                     }
                 }
             }
             .navigationTitle(title)
-#if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
-#endif
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { tripVM.showResults = false }
                 }
             }
         }
-#if os(iOS)
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
-#endif
     }
 }
 
+// A small banner summarising the group's combined constraints
+struct GroupSummaryBanner: View {
+    let passengers: [Passenger]
+
+    var allAllergens: [Allergen] {
+        Array(Set(passengers.flatMap { Array($0.dietaryProfile.allergens) }))
+    }
+    var allRestrictions: [DietaryRestriction] {
+        Array(Set(passengers.flatMap { Array($0.dietaryProfile.restrictions) }))
+    }
+
+    var body: some View {
+        if allAllergens.isEmpty && allRestrictions.isEmpty { EmptyView() }
+        else {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Filtered for your group")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 6) {
+                        ForEach(allRestrictions, id: \.self) { r in
+                            Text("\(r.icon) \(r.displayName)")
+                                .font(.caption.weight(.medium))
+                                .padding(.horizontal, 8).padding(.vertical, 4)
+                                .background(Color.green.opacity(0.12))
+                                .foregroundStyle(.green)
+                                .clipShape(Capsule())
+                        }
+                        ForEach(allAllergens, id: \.self) { a in
+                            Text("⚠️ No \(a.displayName)")
+                                .font(.caption.weight(.medium))
+                                .padding(.horizontal, 8).padding(.vertical, 4)
+                                .background(Color.orange.opacity(0.12))
+                                .foregroundStyle(.orange)
+                                .clipShape(Capsule())
+                        }
+                    }
+                }
+            }
+            .padding()
+            .background(Color(.secondarySystemBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+    }
+}

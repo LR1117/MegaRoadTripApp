@@ -9,10 +9,9 @@ import MapKit
 
 class PlacesService {
 
-    // Search near a coordinate for a given category
     func search(category: PlaceCategory,
                 near coordinate: CLLocationCoordinate2D,
-                radiusMeters: Double = 5000) async -> [MKMapItem] {
+                radiusMeters: Double = 8000) async -> [MKMapItem] {
 
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = category.searchQuery
@@ -23,18 +22,27 @@ class PlacesService {
         )
         request.resultTypes = .pointOfInterest
 
-        let search = MKLocalSearch(request: request)
-        guard let response = try? await search.start() else { return [] }
+        guard let response = try? await MKLocalSearch(request: request).start() else { return [] }
         return response.mapItems
     }
-}
 
-private extension PlaceCategory {
-    var searchQuery: String {
-        switch self {
-        case .food:     return "restaurant"
-        case .gas:      return "gas station"
-        case .restroom: return "rest stop"
+    // Search along the route, near an upcoming waypoint
+    func searchAlongRoute(category: PlaceCategory,
+                          route: MKRoute,
+                          currentLocation: CLLocation,
+                          lookAheadMeters: Double = 15000) async -> [MKMapItem] {
+        // Find the route step that is ~lookAheadMeters ahead
+        var accumulated = 0.0
+        var targetCoordinate = currentLocation.coordinate
+
+        for step in route.steps {
+            accumulated += step.distance
+            if accumulated >= lookAheadMeters {
+                targetCoordinate = step.polyline.coordinate
+                break
+            }
         }
+
+        return await search(category: category, near: targetCoordinate, radiusMeters: 5000)
     }
 }

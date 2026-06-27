@@ -25,4 +25,18 @@ enum Allergen: String, Codable, CaseIterable, Identifiable {
         case .fish:      return "Fish"
         }
     }
+
+    var icon: String {
+        switch self {
+        case .gluten:    return "🌾"
+        case .dairy:     return "🥛"
+        case .nuts:      return "🌰"
+        case .peanuts:   return "🥜"
+        case .shellfish: return "🦐"
+        case .eggs:      return "🥚"
+        case .soy:       return "🫘"
+        case .sesame:    return "⚪️"
+        case .fish:      return "🐟"
+        }
+    }
 }

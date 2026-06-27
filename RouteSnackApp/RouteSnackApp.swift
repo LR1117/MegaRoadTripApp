@@ -6,25 +6,27 @@
 //
 
 import SwiftUI
-import Combine
 
 @main
 struct RouteSnackApp: App {
     @StateObject private var tripVM = TripViewModel()
-    @State private var tripConfigured = false
 
     var body: some Scene {
         WindowGroup {
-            if tripConfigured {
-                MapContainerView()
-                    .environmentObject(tripVM)
-            } else {
-                TripSetupView()
-                    .environmentObject(tripVM)
-                    .onReceive(tripVM.$route.compactMap { $0 }) { _ in
-                        tripConfigured = true
-                    }
-            }
+            ContentRouter()
+                .environmentObject(tripVM)
+        }
+    }
+}
+
+struct ContentRouter: View {
+    @EnvironmentObject var tripVM: TripViewModel
+
+    var body: some View {
+        if tripVM.tripStarted {
+            MapContainerView()
+        } else {
+            TripSetupView()
         }
     }
 }
