@@ -24,25 +24,30 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		0CB958DA2FEF29A1001CB883 /* MegaRoadTripApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MegaRoadTripApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		0CB958E72FEF29A3001CB883 /* MegaRoadTripAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MegaRoadTripAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		0CB958F12FEF29A3001CB883 /* MegaRoadTripAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MegaRoadTripAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		0CB958E72FEF29A3001CB883 /* MegaRoadTripAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = MegaRoadTripAppTests.xctest; path = /Users/liamriedy/Desktop/personalProjects/MegaRoadTripApp/MegaRoadTripApp/build/Debug/MegaRoadTripApp.app/Contents/PlugIns/MegaRoadTripAppTests.xctest; sourceTree = "<absolute>"; };
+		0CB958F12FEF29A3001CB883 /* MegaRoadTripAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = MegaRoadTripAppUITests.xctest; path = "/Users/liamriedy/Desktop/personalProjects/MegaRoadTripApp/MegaRoadTripApp/build/Debug/MegaRoadTripAppUITests-Runner.app/Contents/PlugIns/MegaRoadTripAppUITests.xctest"; sourceTree = "<absolute>"; };
+		0CB959362FEF5FA6001CB883 /* MegaRoadTripApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MegaRoadTripApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		0CB958DC2FEF29A1001CB883 /* MegaRoadTripApp */ = {
+		0CB958DC2FEF29A1001CB883 /* RouteSnackApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = MegaRoadTripApp;
+			path = RouteSnackApp;
 			sourceTree = "<group>";
 		};
-		0CB958EA2FEF29A3001CB883 /* MegaRoadTripAppTests */ = {
+		0CB9590D2FEF2F02001CB883 /* Models */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = MegaRoadTripAppTests;
+			path = Models;
 			sourceTree = "<group>";
 		};
-		0CB958F42FEF29A3001CB883 /* MegaRoadTripAppUITests */ = {
+		0CB9591D2FEF2F51001CB883 /* ViewModels */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = MegaRoadTripAppUITests;
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		0CB959352FEF5210001CB883 /* New Folder */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "New Folder";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -75,21 +80,12 @@
 		0CB958D12FEF29A1001CB883 = {
 			isa = PBXGroup;
 			children = (
-				0CB958DC2FEF29A1001CB883 /* MegaRoadTripApp */,
-				0CB958EA2FEF29A3001CB883 /* MegaRoadTripAppTests */,
-				0CB958F42FEF29A3001CB883 /* MegaRoadTripAppUITests */,
-				0CB958DB2FEF29A1001CB883 /* Products */,
+				0CB958DC2FEF29A1001CB883 /* RouteSnackApp */,
+				0CB9590D2FEF2F02001CB883 /* Models */,
+				0CB9591D2FEF2F51001CB883 /* ViewModels */,
+				0CB959352FEF5210001CB883 /* New Folder */,
+				0CB959362FEF5FA6001CB883 /* MegaRoadTripApp.app */,
 			);
-			sourceTree = "<group>";
-		};
-		0CB958DB2FEF29A1001CB883 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				0CB958DA2FEF29A1001CB883 /* MegaRoadTripApp.app */,
-				0CB958E72FEF29A3001CB883 /* MegaRoadTripAppTests.xctest */,
-				0CB958F12FEF29A3001CB883 /* MegaRoadTripAppUITests.xctest */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -108,13 +104,16 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				0CB958DC2FEF29A1001CB883 /* MegaRoadTripApp */,
+				0CB958DC2FEF29A1001CB883 /* RouteSnackApp */,
+				0CB9590D2FEF2F02001CB883 /* Models */,
+				0CB9591D2FEF2F51001CB883 /* ViewModels */,
+				0CB959352FEF5210001CB883 /* New Folder */,
 			);
 			name = MegaRoadTripApp;
 			packageProductDependencies = (
 			);
 			productName = MegaRoadTripApp;
-			productReference = 0CB958DA2FEF29A1001CB883 /* MegaRoadTripApp.app */;
+			productReference = 0CB959362FEF5FA6001CB883 /* MegaRoadTripApp.app */;
 			productType = "com.apple.product-type.application";
 		};
 		0CB958E62FEF29A3001CB883 /* MegaRoadTripAppTests */ = {
@@ -129,9 +128,6 @@
 			);
 			dependencies = (
 				0CB958E92FEF29A3001CB883 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				0CB958EA2FEF29A3001CB883 /* MegaRoadTripAppTests */,
 			);
 			name = MegaRoadTripAppTests;
 			packageProductDependencies = (
@@ -152,9 +148,6 @@
 			);
 			dependencies = (
 				0CB958F32FEF29A3001CB883 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				0CB958F42FEF29A3001CB883 /* MegaRoadTripAppUITests */,
 			);
 			name = MegaRoadTripAppUITests;
 			packageProductDependencies = (
@@ -196,7 +189,7 @@
 			mainGroup = 0CB958D12FEF29A1001CB883;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 0CB958DB2FEF29A1001CB883 /* Products */;
+			productRefGroup = 0CB958D12FEF29A1001CB883;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -418,13 +411,14 @@
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TARGETED_DEVICE_FAMILY = "1,2";
 				XROS_DEPLOYMENT_TARGET = 26.5;
 			};
 			name = Debug;
@@ -462,13 +456,14 @@
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TARGETED_DEVICE_FAMILY = "1,2";
 				XROS_DEPLOYMENT_TARGET = 26.5;
 			};
 			name = Release;
