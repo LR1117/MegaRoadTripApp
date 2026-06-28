@@ -34,8 +34,11 @@ struct PassengerDetailView: View {
             if !passenger.dietaryProfile.restrictions.isEmpty {
                 Section("Dietary Restrictions") {
                     ForEach(Array(passenger.dietaryProfile.restrictions), id: \.self) { r in
-                        Label(r.displayName, title: { Text(r.displayName) })
-                            .badge(r.icon)
+                        Label {
+                            Text(r.displayName)
+                        } icon: {
+                            Text(r.icon) // Or an Image(systemName:) if it's an SF Symbol
+                        }
                     }
                 }
             }
@@ -57,8 +60,11 @@ struct PassengerDetailView: View {
             if !passenger.dietaryProfile.cuisinePreferences.isEmpty {
                 Section("Favourite Cuisines") {
                     ForEach(Array(passenger.dietaryProfile.cuisinePreferences), id: \.self) { c in
-                        Label(c.displayName, title: { Text(c.displayName) })
-                            .badge(c.icon)
+                                Label {
+                                    Text(c.displayName)
+                                } icon: {
+                                    Text(c.icon)
+                                }
                     }
                 }
             }

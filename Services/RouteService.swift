@@ -1,10 +1,3 @@
-//
-//  RouteService.swift
-//  MegaRoadTripApp
-//
-//  Created by Liam Riedy on 6/26/26.
-//
-
 import MapKit
 import Combine
 
@@ -27,8 +20,7 @@ class RouteService: ObservableObject {
         request.requestsAlternateRoutes = false
 
         do {
-            let directions = MKDirections(request: request)
-            let response = try await directions.calculate()
+            let response = try await MKDirections(request: request).calculate()
             await MainActor.run {
                 self.route = response.routes.first
                 self.isCalculating = false
@@ -41,20 +33,14 @@ class RouteService: ObservableObject {
         }
     }
 
-    // Open the full turn-by-turn directions in Apple Maps
     func openInAppleMaps(from origin: SavedLocation, to destination: SavedLocation) {
         let originItem = MKMapItem(placemark: MKPlacemark(coordinate: origin.coordinate))
         originItem.name = origin.name
-
         let destItem = MKMapItem(placemark: MKPlacemark(coordinate: destination.coordinate))
         destItem.name = destination.name
-
-        MKMapItem.openMaps(
-            with: [originItem, destItem],
-            launchOptions: [
-                MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving,
-                MKLaunchOptionsShowsTrafficKey: true
-            ]
-        )
+        MKMapItem.openMaps(with: [originItem, destItem], launchOptions: [
+            MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving,
+            MKLaunchOptionsShowsTrafficKey: true
+        ])
     }
 }

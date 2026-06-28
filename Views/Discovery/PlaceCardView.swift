@@ -73,7 +73,7 @@ struct PlaceCardView: View {
             .tint(.blue)
         }
         .padding()
-        .background(Color(.secondary.opacity(0.75)))
+        .background(.secondary.opacity(0.75))
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }

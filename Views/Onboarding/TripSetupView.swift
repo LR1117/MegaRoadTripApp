@@ -1,24 +1,15 @@
-//
-//  TripSetupView.swift
-//  MegaRoadTripApp
-//
-//  Created by Liam Riedy on 6/26/26.
-//
-
 import SwiftUI
 import MapKit
 
 struct TripSetupView: View {
     @EnvironmentObject var tripVM: TripViewModel
-    @StateObject private var originSearch  = AddressSearchService()
-    @StateObject private var destSearch    = AddressSearchService()
+    @StateObject private var originSearch = AddressSearchService()
+    @StateObject private var destSearch = AddressSearchService()
 
-    @State private var originText:  String = ""
-    @State private var destText:    String = ""
+    @State private var originText: String = ""
+    @State private var destText: String = ""
     @State private var focusedField: Field? = nil
     @State private var showPassengers = false
-    @State private var isResolvingOrigin = false
-    @State private var isResolvingDest   = false
 
     enum Field { case origin, destination }
 
@@ -26,6 +17,7 @@ struct TripSetupView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 24) {
+
                     // ── App header ─────────────────────────────────────────
                     VStack(spacing: 4) {
                         Text("🚗")
@@ -42,84 +34,87 @@ struct TripSetupView: View {
                     VStack(spacing: 0) {
                         AddressField(
                             label: "From",
-                            icon:  "smallcircle.filled.circle",
+                            icon: "smallcircle.filled.circle",
                             iconColor: .green,
                             text: $originText,
                             placeholder: "Starting point",
                             isFocused: focusedField == .origin,
-                            isLoading: isResolvingOrigin,
-                            confirmedName: tripVM.trip.origin?.name
-                        ) {
-                            focusedField = (focusedField == .origin) ? nil : .origin
-                            if focusedField == .origin { destSearch.cancel() }
-                        }
-                        .onChange(of: originText) { _, new in
+                            confirmedName: tripVM.trip.origin?.name,
+                            onTap: {
+                                if focusedField == .origin {
+                                    focusedField = nil
+                                } else {
+                                    focusedField = .origin
+                                    destSearch.cancel()
+                                }
+                            },
+                            onConfirm: {
+                                confirmOrigin()
+                            }
+                        )
+                        .onChange(of: originText) { _, newValue in
                             tripVM.trip.origin = nil
-                            originSearch.update(query: new)
+                            originSearch.update(query: newValue)
                         }
 
                         Divider().padding(.leading, 52)
 
                         AddressField(
                             label: "To",
-                            icon:  "mappin.circle.fill",
+                            icon: "mappin.circle.fill",
                             iconColor: .red,
                             text: $destText,
                             placeholder: "Destination",
                             isFocused: focusedField == .destination,
-                            isLoading: isResolvingDest,
-                            confirmedName: tripVM.trip.destination?.name
-                        ) {
-                            focusedField = (focusedField == .destination) ? nil : .destination
-                            if focusedField == .destination { originSearch.cancel() }
-                        }
-                        .onChange(of: destText) { _, new in
+                            confirmedName: tripVM.trip.destination?.name,
+                            onTap: {
+                                if focusedField == .destination {
+                                    focusedField = nil
+                                } else {
+                                    focusedField = .destination
+                                    originSearch.cancel()
+                                }
+                            },
+                            onConfirm: {
+                                confirmDestination()
+                            }
+                        )
+                        .onChange(of: destText) { _, newValue in
                             tripVM.trip.destination = nil
-                            destSearch.update(query: new)
+                            destSearch.update(query: newValue)
                         }
                     }
                     .background(Color(.secondarySystemBackground))
                     .clipShape(RoundedRectangle(cornerRadius: 16))
                     .padding(.horizontal)
 
-                    // ── Suggestions dropdown ───────────────────────────────
+                    // ── Origin suggestions ─────────────────────────────────
                     if focusedField == .origin && !originSearch.suggestions.isEmpty {
-                        SuggestionList(suggestions: originSearch.suggestions) { pick in
-                            isResolvingOrigin = true
+                        SuggestionList(suggestions: originSearch.suggestions) { item in
+                            tripVM.trip.origin = SavedLocation(
+                                name: item.name ?? item.placemark.title ?? "Unknown",
+                                coordinate: item.placemark.coordinate
+                            )
+                            originText = item.name ?? ""
                             focusedField = nil
                             originSearch.cancel()
-                            Task {
-                                if let item = await originSearch.resolve(pick) {
-                                    tripVM.trip.origin = SavedLocation(
-                                        name: pick.title,
-                                        coordinate: item.placemark.coordinate
-                                    )
-                                    originText = pick.title
-                                }
-                                isResolvingOrigin = false
-                            }
                         }
                     }
 
+                    // ── Destination suggestions ────────────────────────────
                     if focusedField == .destination && !destSearch.suggestions.isEmpty {
-                        SuggestionList(suggestions: destSearch.suggestions) { pick in
-                            isResolvingDest = true
+                        SuggestionList(suggestions: destSearch.suggestions) { item in
+                            tripVM.trip.destination = SavedLocation(
+                                name: item.name ?? item.placemark.title ?? "Unknown",
+                                coordinate: item.placemark.coordinate
+                            )
+                            destText = item.name ?? ""
                             focusedField = nil
                             destSearch.cancel()
-                            Task {
-                                if let item = await destSearch.resolve(pick) {
-                                    tripVM.trip.destination = SavedLocation(
-                                        name: pick.title,
-                                        coordinate: item.placemark.coordinate
-                                    )
-                                    destText = pick.title
-                                }
-                                isResolvingDest = false
-                            }
                         }
                     }
 
-                    // ── Passengers card ───────────────────────────────────
+                    // ── Passengers card ────────────────────────────────────
                     VStack(alignment: .leading, spacing: 12) {
                         HStack {
                             Label("Who's in the car?", systemImage: "person.2.fill")
@@ -153,28 +148,26 @@ struct TripSetupView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 16))
                     .padding(.horizontal)
 
-                    // ── Validation hints ──────────────────────────────────
-                    if !tripVM.trip.passengers.isEmpty || tripVM.trip.origin != nil || tripVM.trip.destination != nil {
+                    // ── Validation hints ───────────────────────────────────
+                    if !tripVM.trip.passengers.isEmpty ||
+                        tripVM.trip.origin != nil ||
+                        tripVM.trip.destination != nil {
                         VStack(spacing: 6) {
-                            ValidationRow(done: tripVM.trip.origin != nil,      label: "Starting point set")
-                            ValidationRow(done: tripVM.trip.destination != nil, label: "Destination set")
+                            ValidationRow(done: tripVM.trip.origin != nil,       label: "Starting point set")
+                            ValidationRow(done: tripVM.trip.destination != nil,  label: "Destination set")
                             ValidationRow(done: !tripVM.trip.passengers.isEmpty, label: "At least one passenger added")
                         }
                         .padding(.horizontal)
                     }
 
-                    // ── Let's Go button ───────────────────────────────────
-                    Button(action: {
+                    // ── Let's Go button ────────────────────────────────────
+                    Button {
                         focusedField = nil
                         tripVM.startTrip()
-                    }) {
+                    } label: {
                         HStack {
-                            if tripVM.isCalculatingRoute {
-                                ProgressView().tint(.white)
-                            } else {
-                                Image(systemName: "arrow.right.circle.fill")
-                            }
-                            Text(tripVM.isCalculatingRoute ? "Getting route…" : "Let's Go!")
+                            Image(systemName: "arrow.right.circle.fill")
+                            Text("Let's Go!")
                                 .fontWeight(.bold)
                         }
                         .frame(maxWidth: .infinity)
@@ -183,9 +176,8 @@ struct TripSetupView: View {
                         .foregroundStyle(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                     }
-                    .disabled(!tripVM.canStartTrip || tripVM.isCalculatingRoute)
+                    .disabled(!tripVM.canStartTrip)
                     .padding(.horizontal)
-                    .padding(.bottom, 32)
 
                     if let err = tripVM.routeError {
                         Text("⚠️ \(err)")
@@ -193,6 +185,8 @@ struct TripSetupView: View {
                             .foregroundStyle(.red)
                             .padding(.horizontal)
                     }
+
+                    Spacer().frame(height: 16)
                 }
             }
             .navigationBarHidden(true)
@@ -203,9 +197,71 @@ struct TripSetupView: View {
             }
         }
     }
+
+    // MARK: - Confirm helpers
+
+    private func confirmOrigin() {
+        guard !originText.isEmpty else { return }
+        // If suggestions are already loaded, just use the first one
+        if let first = originSearch.suggestions.first {
+            tripVM.trip.origin = SavedLocation(
+                name: first.name ?? originText,
+                coordinate: first.placemark.coordinate
+            )
+            originText = first.name ?? originText
+            focusedField = nil
+            originSearch.cancel()
+            return
+        }
+        // Otherwise fire a fresh search
+        focusedField = nil
+        originSearch.cancel()
+        Task {
+            let request = MKLocalSearch.Request()
+            request.naturalLanguageQuery = originText
+            request.resultTypes = [.address, .pointOfInterest]
+            if let response = try? await MKLocalSearch(request: request).start(),
+               let first = response.mapItems.first {
+                tripVM.trip.origin = SavedLocation(
+                    name: first.name ?? originText,
+                    coordinate: first.placemark.coordinate
+                )
+                originText = first.name ?? originText
+            }
+        }
+    }
+
+    private func confirmDestination() {
+        guard !destText.isEmpty else { return }
+        if let first = destSearch.suggestions.first {
+            tripVM.trip.destination = SavedLocation(
+                name: first.name ?? destText,
+                coordinate: first.placemark.coordinate
+            )
+            destText = first.name ?? destText
+            focusedField = nil
+            destSearch.cancel()
+            return
+        }
+        focusedField = nil
+        destSearch.cancel()
+        Task {
+            let request = MKLocalSearch.Request()
+            request.naturalLanguageQuery = destText
+            request.resultTypes = [.address, .pointOfInterest]
+            if let response = try? await MKLocalSearch(request: request).start(),
+               let first = response.mapItems.first {
+                tripVM.trip.destination = SavedLocation(
+                    name: first.name ?? destText,
+                    coordinate: first.placemark.coordinate
+                )
+                destText = first.name ?? destText
+            }
+        }
+    }
 }
 
-// MARK: – Sub-views
+// MARK: - AddressField
 
 struct AddressField: View {
     let label: String
@@ -214,9 +270,9 @@ struct AddressField: View {
     @Binding var text: String
     let placeholder: String
     let isFocused: Bool
-    let isLoading: Bool
     let confirmedName: String?
     let onTap: () -> Void
+    let onConfirm: () -> Void
 
     var body: some View {
         HStack(spacing: 12) {
@@ -239,16 +295,23 @@ struct AddressField: View {
                     TextField(placeholder, text: $text)
                         .font(.subheadline)
                         .autocorrectionDisabled()
+                        .textInputAutocapitalization(.words)
+                        .submitLabel(.search)
+                        .onSubmit { onConfirm() }
                 }
             }
 
             Spacer()
 
-            if isLoading {
-                ProgressView().scaleEffect(0.8)
-            } else if confirmedName != nil {
+            if confirmedName != nil {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundStyle(.green)
+            } else if !text.isEmpty {
+                Button(action: onConfirm) {
+                    Image(systemName: "arrow.right.circle.fill")
+                        .foregroundStyle(iconColor)
+                        .font(.title3)
+                }
             }
         }
         .padding(.horizontal, 16)
@@ -260,29 +323,32 @@ struct AddressField: View {
     }
 }
 
+// MARK: - SuggestionList
+
 struct SuggestionList: View {
-    let suggestions: [MKLocalSearchCompletion]
-    let onSelect: (MKLocalSearchCompletion) -> Void
+    let suggestions: [MKMapItem]
+    let onSelect: (MKMapItem) -> Void
 
     var body: some View {
         VStack(spacing: 0) {
             ForEach(suggestions.indices, id: \.self) { i in
-                let s = suggestions[i]
+                let item = suggestions[i]
                 Button {
-                    onSelect(s)
+                    onSelect(item)
                 } label: {
                     HStack(spacing: 12) {
                         Image(systemName: "mappin")
                             .foregroundStyle(.secondary)
                             .frame(width: 24)
                         VStack(alignment: .leading, spacing: 1) {
-                            Text(s.title)
+                            Text(item.name ?? "Unknown")
                                 .font(.subheadline)
                                 .foregroundStyle(.primary)
-                            if !s.subtitle.isEmpty {
-                                Text(s.subtitle)
+                            if let subtitle = item.placemark.title, !subtitle.isEmpty {
+                                Text(subtitle)
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
+                                    .lineLimit(1)
                             }
                         }
                         Spacer()
@@ -290,6 +356,7 @@ struct SuggestionList: View {
                     .padding(.horizontal, 16)
                     .padding(.vertical, 11)
                 }
+                .buttonStyle(.plain)
 
                 if i < suggestions.count - 1 {
                     Divider().padding(.leading, 52)
@@ -302,6 +369,8 @@ struct SuggestionList: View {
         .shadow(color: .black.opacity(0.06), radius: 8, y: 4)
     }
 }
+
+// MARK: - PassengerChip
 
 struct PassengerChip: View {
     let passenger: Passenger
@@ -318,6 +387,8 @@ struct PassengerChip: View {
         .clipShape(Capsule())
     }
 }
+
+// MARK: - ValidationRow
 
 struct ValidationRow: View {
     let done: Bool

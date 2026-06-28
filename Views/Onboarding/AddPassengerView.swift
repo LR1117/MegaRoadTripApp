@@ -1,10 +1,3 @@
-//
-//  AddPassengerView'.swift
-//  MegaRoadTripApp
-//
-//  Created by Liam Riedy on 6/26/26.
-//
-
 import SwiftUI
 
 struct AddPassengerView: View {
@@ -12,10 +5,13 @@ struct AddPassengerView: View {
     @StateObject private var vm = PassengerViewModel()
     @Environment(\.dismiss) private var dismiss
 
+    let emojiOptions = ["🧑","👦","👧","👨","👩","🧒","🧓","👴","👵","🧔","👱"]
+
     var body: some View {
         NavigationStack {
             Form {
-                // ── Identity ───────────────────────────────────────────────
+
+                // MARK: - Identity
                 Section("Name & Avatar") {
                     TextField("Passenger name", text: $vm.name)
 
@@ -23,21 +19,25 @@ struct AddPassengerView: View {
                         Text("Choose an avatar")
                             .font(.caption)
                             .foregroundStyle(.secondary)
+
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 8) {
-                                ForEach(vm.emojiOptions, id: \.self) { e in
+                                ForEach(emojiOptions, id: \.self) { e in
                                     Text(e)
                                         .font(.system(size: 32))
                                         .padding(8)
                                         .background(
                                             vm.emoji == e
-                                            ? Color.accentColor.opacity(0.2)
-                                            : Color(.tertiarySystemBackground)
+                                                ? Color.accentColor.opacity(0.2)
+                                                : Color(.tertiarySystemBackground)
                                         )
                                         .clipShape(RoundedRectangle(cornerRadius: 10))
                                         .overlay(
                                             RoundedRectangle(cornerRadius: 10)
-                                                .stroke(vm.emoji == e ? Color.accentColor : Color.clear, lineWidth: 2)
+                                                .stroke(
+                                                    vm.emoji == e ? Color.accentColor : Color.clear,
+                                                    lineWidth: 2
+                                                )
                                         )
                                         .onTapGesture { vm.emoji = e }
                                 }
@@ -49,18 +49,23 @@ struct AddPassengerView: View {
                     Toggle("This person is driving", isOn: $vm.isDriver)
                 }
 
-                // ── Dietary restrictions ───────────────────────────────────
+                // MARK: - Dietary Restrictions
                 Section {
                     ForEach(DietaryRestriction.allCases) { r in
                         Toggle(isOn: Binding(
                             get: { vm.dietaryProfile.restrictions.contains(r) },
-                            set: {
-                                if $0 { vm.dietaryProfile.restrictions.insert(r) }
-                                else  { vm.dietaryProfile.restrictions.remove(r) }
+                            set: { enabled in
+                                if enabled {
+                                    vm.dietaryProfile.restrictions.insert(r)
+                                } else {
+                                    vm.dietaryProfile.restrictions.remove(r)
+                                }
                             }
                         )) {
-                            Label(r.displayName, title: { Text(r.displayName) })
-                                .badge(r.icon)
+                            HStack(spacing: 8) {
+                                Text(r.icon)
+                                Text(r.displayName)
+                            }
                         }
                     }
                 } header: {
@@ -69,18 +74,23 @@ struct AddPassengerView: View {
                     Text("These help RouteSnack prioritise restaurants that suit everyone.")
                 }
 
-                // ── Allergens ──────────────────────────────────────────────
+                // MARK: - Allergens
                 Section {
                     ForEach(Allergen.allCases) { a in
                         Toggle(isOn: Binding(
                             get: { vm.dietaryProfile.allergens.contains(a) },
-                            set: {
-                                if $0 { vm.dietaryProfile.allergens.insert(a) }
-                                else  { vm.dietaryProfile.allergens.remove(a) }
+                            set: { enabled in
+                                if enabled {
+                                    vm.dietaryProfile.allergens.insert(a)
+                                } else {
+                                    vm.dietaryProfile.allergens.remove(a)
+                                }
                             }
                         )) {
-                            Label(a.displayName, title: { Text(a.displayName) })
-                                .badge(a.icon)
+                            HStack(spacing: 8) {
+                                Text(a.icon)
+                                Text(a.displayName)
+                            }
                         }
                     }
                 } header: {
@@ -89,18 +99,23 @@ struct AddPassengerView: View {
                     Text("Allergens are flagged prominently and affect place scoring.")
                 }
 
-                // ── Cuisine preferences ────────────────────────────────────
+                // MARK: - Cuisine Preferences
                 Section("Favourite Cuisines") {
                     ForEach(CuisinePreference.allCases) { c in
                         Toggle(isOn: Binding(
                             get: { vm.dietaryProfile.cuisinePreferences.contains(c) },
-                            set: {
-                                if $0 { vm.dietaryProfile.cuisinePreferences.insert(c) }
-                                else  { vm.dietaryProfile.cuisinePreferences.remove(c) }
+                            set: { enabled in
+                                if enabled {
+                                    vm.dietaryProfile.cuisinePreferences.insert(c)
+                                } else {
+                                    vm.dietaryProfile.cuisinePreferences.remove(c)
+                                }
                             }
                         )) {
-                            Label(c.displayName, title: { Text(c.displayName) })
-                                .badge(c.icon)
+                            HStack(spacing: 8) {
+                                Text(c.icon)
+                                Text(c.displayName)
+                            }
                         }
                     }
                 }
