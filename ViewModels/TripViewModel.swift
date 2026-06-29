@@ -1,3 +1,8 @@
+//
+//  TripViewModel.swift
+//  MegaRoadTripApp
+//
+
 import SwiftUI
 import MapKit
 import Combine
@@ -18,6 +23,10 @@ class TripViewModel: ObservableObject {
     @Published var isCalculatingRoute = false
     @Published var routeError: String?
 
+    // MARK: - Rerouting UI state (NEW)
+    @Published var isOffRoute: Bool = false
+    @Published var isRerouting: Bool = false
+
     // MARK: - Turn list
     @Published var showTurnList = false
 
@@ -34,11 +43,13 @@ class TripViewModel: ObservableObject {
     private let filterService = FilterService()
     private var cancellables = Set<AnyCancellable>()
 
+    // MARK: - Init
     init() {
+        // Location updates → currentLocation + step tracking + camera follow
         locationService.$currentLocation
             .receive(on: DispatchQueue.main)
             .sink { [weak self] loc in
-                guard let self = self else { return }
+                guard let self else { return }
                 self.currentLocation = loc
                 self.updateCurrentStep()
                 if self.tripStarted && self.route != nil {
@@ -47,12 +58,20 @@ class TripViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
+        // Route updates → store + push to LocationService so off-route detection runs
         routeService.$route
             .receive(on: DispatchQueue.main)
             .sink { [weak self] r in
-                guard let self = self else { return }
+                guard let self else { return }
                 self.route = r
-                if r != nil { self.zoomToStartOfRoute() }
+                self.locationService.activeRoute = r      // ← NEW: keep LocationService in sync
+                if r != nil {
+                    self.zoomToStartOfRoute()
+                    // After a reroute completes, reset off-route state
+                    self.locationService.rerouteCompleted()
+                    self.isOffRoute = false
+                    self.isRerouting = false
+                }
             }
             .store(in: &cancellables)
 
@@ -65,6 +84,32 @@ class TripViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] e in self?.routeError = e }
             .store(in: &cancellables)
+
+        // Off-route flag from LocationService → publish to UI (NEW)
+        locationService.$isOffRoute
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] offRoute in
+                self?.isOffRoute = offRoute
+            }
+            .store(in: &cancellables)
+
+        // Rerouting flag from LocationService → publish to UI (NEW)
+        locationService.$isRerouting
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] rerouting in
+                self?.isRerouting = rerouting
+            }
+            .store(in: &cancellables)
+
+        // Wire the reroute callback: LocationService detects off-route → we ask RouteService (NEW)
+        locationService.onRerouteNeeded = { [weak self] currentCoord in
+            guard let self,
+                  let destination = self.trip.destination else { return }
+            Task {
+                await self.routeService.reroute(from: currentCoord,
+                                                to: destination.coordinate)
+            }
+        }
     }
 
     // MARK: - Computed
@@ -74,7 +119,7 @@ class TripViewModel: ObservableObject {
     }
 
     var currentStep: MKRoute.Step? {
-        guard let route = route, currentStepIndex < route.steps.count else { return nil }
+        guard let route, currentStepIndex < route.steps.count else { return nil }
         return route.steps[currentStepIndex]
     }
 
@@ -83,22 +128,22 @@ class TripViewModel: ObservableObject {
     }
 
     var distanceRemaining: String {
-        guard let route = route else { return "" }
+        guard let route else { return "" }
         return String(format: "%.0f mi", route.distance / 1609.34)
     }
 
     var etaString: String {
-        guard let route = route else { return "" }
+        guard let route else { return "" }
         let arrival = Date().addingTimeInterval(route.expectedTravelTime)
         let f = DateFormatter(); f.timeStyle = .short
         return f.string(from: arrival)
     }
 
     var travelTimeString: String {
-        guard let route = route else { return "" }
+        guard let route else { return "" }
         let minutes = route.expectedTravelTime / 60
         if minutes < 60 { return String(format: "%.0f min", minutes) }
-        let h = Int(minutes / 60); let m = Int(minutes) % 60
+        let h = Int(minutes / 60), m = Int(minutes) % 60
         return "\(h)h \(m)m"
     }
 
@@ -140,64 +185,35 @@ class TripViewModel: ObservableObject {
 
     func findNearby(category: PlaceCategory) {
         let location = currentLocation ?? syntheticLocation()
-        guard let location = location else { return }
+        guard let location else { return }
         activeCategory = category
         isSearching = true
         discoveredPlaces = []
 
         Task {
-            // 1. Fetch raw candidates from the map
             var raw: [MKMapItem]
-            if let route = route {
-                raw = await placesService.searchAlongRoute(
-                    category: category,
-                    route: route,
-                    currentLocation: location
-                )
+            if let route {
+                raw = await placesService.searchAlongRoute(category: category, route: route, currentLocation: location)
             } else {
                 raw = await placesService.search(category: category, near: location.coordinate)
             }
 
-            // 2. Apply category-specific filtering (all enforce 1-mile route proximity)
             let results: [PlaceResult]
             switch category {
             case .food:
-                results = filterService.score(
-                    places: raw,
-                    for: trip.passengers,
-                    currentLocation: location,
-                    route: route
-                )
-
+                results = filterService.score(places: raw, for: trip.passengers, currentLocation: location, route: route)
             case .gas:
-                results = filterService.filterGasStations(
-                    items: raw,
-                    currentLocation: location,
-                    route: route
-                )
-
+                results = filterService.filterGasStations(items: raw, currentLocation: location, route: route)
             case .restroom:
-                // For restrooms also pull gas stations since many have bathrooms
                 var restroomRaw = raw
-                if let route = route {
-                    let gasRaw = await placesService.searchAlongRoute(
-                        category: .gas,
-                        route: route,
-                        currentLocation: location
-                    )
+                if let route {
+                    let gasRaw = await placesService.searchAlongRoute(category: .gas, route: route, currentLocation: location)
                     restroomRaw += gasRaw
                 } else {
-                    let gasRaw = await placesService.search(
-                        category: .gas,
-                        near: location.coordinate
-                    )
+                    let gasRaw = await placesService.search(category: .gas, near: location.coordinate)
                     restroomRaw += gasRaw
                 }
-                results = filterService.filterRestrooms(
-                    items: restroomRaw,
-                    currentLocation: location,
-                    route: route
-                )
+                results = filterService.filterRestrooms(items: restroomRaw, currentLocation: location, route: route)
             }
 
             self.discoveredPlaces = results

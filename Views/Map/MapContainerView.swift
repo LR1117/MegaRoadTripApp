@@ -75,7 +75,9 @@ struct MapContainerView: View {
                 // Tappable turn banner
                 if tripVM.route != nil {
                     Button {
-                        tripVM.showTurnList = true
+                        if !tripVM.isRerouting && !tripVM.isOffRoute {
+                            tripVM.showTurnList = true
+                        }
                     } label: {
                         TurnBannerView()
                             .environmentObject(tripVM)
@@ -156,45 +158,6 @@ struct TurnBannerView: View {
         return String(format: "%.1f mi", miles)
     }
 
-    var body: some View {
-        HStack(spacing: 14) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(hex: "3478F6"))
-                    .frame(width: 52, height: 52)
-                Image(systemName: turnIcon)
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundStyle(.white)
-            }
-
-            VStack(alignment: .leading, spacing: 2) {
-                if !stepDistance.isEmpty {
-                    Text(stepDistance)
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(Color(hex: "3478F6"))
-                }
-                Text(stepInstruction)
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundStyle(.primary)
-                    .lineLimit(2)
-            }
-
-            Spacer()
-
-            // Chevron hint that it's tappable
-            Image(systemName: "chevron.down")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(.regularMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(color: .black.opacity(0.12), radius: 8, y: 4)
-        .padding(.horizontal, 12)
-        .padding(.top, 56)
-    }
-
     var turnIcon: String {
         let i = tripVM.currentStep?.instructions.lowercased() ?? ""
         if i.contains("left")                        { return "arrow.turn.up.left" }
@@ -206,7 +169,108 @@ struct TurnBannerView: View {
         if i.contains("arrive") || i.contains("destination") { return "mappin.circle.fill" }
         return "arrow.up"
     }
+
+    var body: some View {
+        Group {
+            if tripVM.isRerouting {
+                // ── Rerouting banner ──────────────────────────────────────
+                HStack(spacing: 14) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color(hex: "8E44AD"))
+                            .frame(width: 52, height: 52)
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .scaleEffect(1.2)
+                    }
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Rerouting…")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundStyle(.primary)
+                        Text("Calculating a new route")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(.regularMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .shadow(color: .black.opacity(0.12), radius: 8, y: 4)
+                .padding(.horizontal, 12)
+                .padding(.top, 56)
+
+            } else if tripVM.isOffRoute {
+                // ── Off-route banner ──────────────────────────────────────
+                HStack(spacing: 14) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color(hex: "FF9500"))
+                            .frame(width: 52, height: 52)
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.system(size: 22, weight: .bold))
+                            .foregroundStyle(.white)
+                    }
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Off Route")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundStyle(.primary)
+                        Text("Finding a new route…")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(.regularMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .shadow(color: Color(hex: "FF9500").opacity(0.3), radius: 8, y: 4)
+                .padding(.horizontal, 12)
+                .padding(.top, 56)
+
+            } else {
+                // ── Normal turn banner ────────────────────────────────────
+                HStack(spacing: 14) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color(hex: "3478F6"))
+                            .frame(width: 52, height: 52)
+                        Image(systemName: turnIcon)
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundStyle(.white)
+                    }
+                    VStack(alignment: .leading, spacing: 2) {
+                        if !stepDistance.isEmpty {
+                            Text(stepDistance)
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(Color(hex: "3478F6"))
+                        }
+                        Text(stepInstruction)
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundStyle(.primary)
+                            .lineLimit(2)
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.down")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(.regularMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .shadow(color: .black.opacity(0.12), radius: 8, y: 4)
+                .padding(.horizontal, 12)
+                .padding(.top, 56)
+            }
+        }
+        .animation(.easeInOut(duration: 0.25), value: tripVM.isOffRoute)
+        .animation(.easeInOut(duration: 0.25), value: tripVM.isRerouting)
+    }
 }
+
 
 // MARK: - Turn List Sheet
 
